@@ -12,7 +12,6 @@ struct BannerView: View {
         Rectangle()
             .cornerRadius(10)
             .padding()
-            .frame(width: UIScreen.main.bounds.width, height: 200)
             .foregroundColor(Color(uiColor: .systemBrown))
     }
 }

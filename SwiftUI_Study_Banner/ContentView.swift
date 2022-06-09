@@ -10,10 +10,9 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         VStack {
+            Text("위에는 페이지만")
             CustomScrollView()
-            ForEach(1...5, id: \.self) {
-                Text("\($0)")
-            }
+            Text("아래는 자동만")
         }
     }
 }

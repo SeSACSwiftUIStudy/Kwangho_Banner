@@ -21,5 +21,8 @@ class ViewModel: ObservableObject {
         Model(imageURL: "4")
     ]
     
+    @Published var activePage = 0
+    @Published var screenDrag = 0.0
+    
     @Published var countSeconds = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
 }

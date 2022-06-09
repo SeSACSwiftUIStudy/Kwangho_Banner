@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct CustomScrollView: View {
-    @State var pageIndex: Int = 0
     @State var offset: CGFloat = .zero
     @State var isGestureActive: Bool = false
-
+    
+    @State var pageIndex = 0
     @StateObject var viewModel = ViewModel()
+    @GestureState var isDetecting = false
     
     var body: some View {
         //MARK: 1번째
@@ -32,36 +33,53 @@ struct CustomScrollView: View {
         ScrollViewReader { scrollReader in
             GeometryReader { proxy in
                 ScrollView(.horizontal, showsIndicators: true) {
-                    HStack(alignment: .center) {
+                    HStack(spacing: .zero) {
                         ForEach(viewModel.data) { page in
                             BannerView()
                         }
+                        .frame(width: proxy.size.width, height: proxy.size.height * 0.5, alignment: .leading)
+                        .offset(x: CGFloat(self.pageIndex) * -proxy.size.width, y: 0)
+                        .animation(.spring())
+                        .onReceive(self.viewModel.countSeconds, perform: { _ in
+                            self.pageIndex = (self.pageIndex + 1) % self.viewModel.data.count
+                        })
                     }
                     .background(GeometryReader(content: { stackProxy in
                         Color.red.preference(key: ScrollOffset.self, value: -stackProxy.frame(in: .named("scroll")).origin.x)
                     }))
                 }
-                .onPreferenceChange(ScrollOffset.self, perform: { value in
-                    let screenWidth = UIScreen.main.bounds.width
-                    print(value)
-                    value > 100 ? print("true",floor(floor(value/screenWidth))) : print("false",floor(screenWidth))
-                    switch floor(value/screenWidth) {
-                    case 1: scrollReader.scrollTo(0, anchor: .center)
-                    case 2: print("2")
-                    case 3: print("3")
-                    case 4: print("4")
-                    default: break
-                    }
-                }).coordinateSpace(name: "scroll")
+                /*
+                 .gesture(DragGesture().updating($isDetecting) { current, gesture, transcation in
+                 self.viewModel.screenDrag = current.translation.width
+                 }.onEnded { value in
+                 self.viewModel.screenDrag = 0
+                 
+                 if (value.translation.width < -50) &&  self.viewModel.activePage < self.viewModel.data.count - 1 {
+                 self.viewModel.activePage += 1
+                 let impactMed = UIImpactFeedbackGenerator(style: .medium)
+                 impactMed.impactOccurred()
+                 }
+                 
+                 if (value.translation.width > 50) && self.viewModel.activePage > 0 {
+                 self.viewModel.activePage -= 1
+                 let impactMed = UIImpactFeedbackGenerator(style: .medium)
+                 impactMed.impactOccurred()
+                 }
+                 })
+                 
+                 .onPreferenceChange(ScrollOffset.self, perform: { value in
+                 print(value)
+                 }).coordinateSpace(name: "scroll")
+                 */
                 .overlay {
                     GeometryReader { subProxy in
-                        Text(" \(viewModel.data.capacity) / \(viewModel.data.count) ")
+                        Text(" \(self.pageIndex + 1) / \(viewModel.data.count) ")
                             .background(Color(uiColor: .systemGray5))
                             .padding([.bottom, .trailing])
                             .frame(width: UIScreen.main.bounds.width,
                                    height: subProxy.size.height,
                                    alignment: .bottomTrailing)
-                            
+                        
                     }
                 }
             }
